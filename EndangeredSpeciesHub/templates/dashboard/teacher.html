@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Dashboard</h2>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="dashboard-stats">
+            <h4>Educational Resources</h4>
+            <p class="h2 mb-0">{{ resources|length }}</p>
+            <a href="{{ url_for('education.resources') }}" class="btn btn-outline-primary mt-3">
+                Manage Resources
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="dashboard-stats">
+            <h4>Species Database</h4>
+            <p class="h2 mb-0">{{ species|length }}</p>
+            <a href="{{ url_for('species.list') }}" class="btn btn-outline-primary mt-3">
+                Manage Species
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="dashboard-stats">
+            <h4>Conservation Programs</h4>
+            <p class="h2 mb-0">{{ programs|length }}</p>
+            <a href="{{ url_for('programs.list') }}" class="btn btn-outline-primary mt-3">
+                Manage Programs
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Quick Actions</h4>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('species.add') }}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Add New Species
+                    </a>
+                    <a href="{{ url_for('education.add_resource') }}" class="btn btn-info">
+                        <i class="fas fa-book me-2"></i>Create Resource
+                    </a>
+                    <a href="{{ url_for('programs.add') }}" class="btn btn-warning">
+                        <i class="fas fa-calendar me-2"></i>Schedule Program
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

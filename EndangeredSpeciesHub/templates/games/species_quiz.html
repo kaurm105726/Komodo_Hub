@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Species Quiz{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-question-circle me-2"></i>Species Quiz</h2>
+        <p class="lead">Test your knowledge about endangered species!</p>
+    </div>
+</div>
+
+<div class="quiz-container">
+    <div class="card quiz-card">
+        <div class="card-body">
+            <div id="quiz-progress" class="progress mb-4" style="height: 10px;">
+                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+
+            <div id="question-container">
+                <h4 id="question-text" class="mb-4">Loading question...</h4>
+                
+                <div id="options-container" class="d-grid gap-3">
+                    <!-- Options will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <div id="result-container" class="mt-4 d-none">
+                <div class="alert" role="alert">
+                    <h5 class="alert-heading mb-0"></h5>
+                    <p class="mb-0"></p>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <button id="next-button" class="btn btn-primary d-none">
+                    Next Question <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+                <button id="finish-button" class="btn btn-success d-none">
+                    Finish Quiz <i class="fas fa-check ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentQuestion = 0;
+let score = 0;
+let questions = [];
+
+function loadQuestion() {
+    fetch('/api/quiz/get-question')
+        .then(response => response.json())
+        .then(data => {
+            const questionContainer = document.getElementById('question-container');
+            const optionsContainer = document.getElementById('options-container');
+            
+            document.getElementById('question-text').textContent = data.question;
+            optionsContainer.innerHTML = '';
+            
+            data.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn btn-outline-primary quiz-option';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index, data.correct, data.explanation);
+                optionsContainer.appendChild(button);
+            });
+        });
+}
+
+function selectAnswer(selected, correct, explanation) {
+    const options = document.querySelectorAll('.quiz-option');
+    options.forEach(option => option.disabled = true);
+    
+    options[selected].classList.add(selected === correct ? 'correct' : 'incorrect');
+    if (selected !== correct) {
+        options[correct].classList.add('correct');
+    }
+    
+    const resultContainer = document.getElementById('result-container');
+    const alert = resultContainer.querySelector('.alert');
+    const heading = alert.querySelector('.alert-heading');
+    const explanation_text = alert.querySelector('p');
+    
+    if (selected === correct) {
+        score++;
+        alert.className = 'alert alert-success';
+        heading.textContent = 'Correct!';
+    } else {
+        alert.className = 'alert alert-danger';
+        heading.textContent = 'Incorrect';
+    }
+    explanation_text.textContent = explanation;
+    resultContainer.classList.remove('d-none');
+    
+    document.getElementById('next-button').classList.remove('d-none');
+    updateProgress();
+}
+
+function updateProgress() {
+    currentQuestion++;
+    const progress = (currentQuestion / 10) * 100;
+    document.querySelector('.progress-bar').style.width = `${progress}%`;
+    
+    if (currentQuestion >= 10) {
+        document.getElementById('next-button').classList.add('d-none');
+        document.getElementById('finish-button').classList.remove('d-none');
+    }
+}
+
+function nextQuestion() {
+    document.getElementById('result-container').classList.add('d-none');
+    document.getElementById('next-button').classList.add('d-none');
+    loadQuestion();
+}
+
+document.getElementById('next-button').onclick = nextQuestion;
+document.getElementById('finish-button').onclick = () => {
+    const percentage = (score / 10) * 100;
+    document.getElementById('question-container').innerHTML = `
+        <div class="text-center">
+            <h3>Quiz Complete!</h3>
+            <p class="display-4">${score} / 10</p>
+            <p class="lead">You scored ${percentage}%</p>
+            <a href="/quiz/species" class="btn btn-primary mt-3">Try Again</a>
+        </div>
+    `;
+};
+
+// Start the quiz
+loadQuestion();
+</script>
+{% endblock %}
